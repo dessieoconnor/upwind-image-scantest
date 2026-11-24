@@ -1,0 +1,25 @@
+name: Upwind image scan
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build . -t upwind-test-image:${{ github.sha }}
+
+      - name: Upwind ShiftLeft image scan
+        uses: upwindsecurity/shiftleft-create-image-scan-event-action@main
+        with:
+          upwind_client_id: ${{ secrets.UPWIND_CLIENT_ID }}
+          upwind_client_secret: ${{ secrets.UPWIND_CLIENT_SECRET }}
+          docker_image: upwind-test-image:${{ github.sha }}
+          pull_image: false
+          # upwind_uri: eu.upwind.io   # only if your account isn't in the US region
